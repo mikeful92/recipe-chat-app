@@ -1,0 +1,45 @@
+{% extends "base.html" %}
+{% block title %}Recipe Detail{% endblock %}
+{% block content %}
+<section class="card stack">
+  <h1>{{ recipe.title }}</h1>
+  <p><strong>Servings:</strong> {{ recipe.servings }} | <strong>Time:</strong> {{ recipe.time_minutes }} min</p>
+
+  <h2>Ingredients</h2>
+  <ul>
+    {% for ingredient in recipe.ingredients %}
+      <li>{{ ingredient.amount }} {{ ingredient.unit }} {{ ingredient.name }}</li>
+    {% endfor %}
+  </ul>
+
+  <h2>Steps</h2>
+  <ol>
+    {% for step in recipe.steps %}
+      <li>{{ step.text }}</li>
+    {% endfor %}
+  </ol>
+
+  <div class="actions">
+    <a class="button-link" href="/cook/{{ recipe.id }}">View cook mode</a>
+  </div>
+
+  <h2>Notes</h2>
+  <form method="post" action="/recipes/ui/{{ recipe.id }}/notes" class="stack">
+    <textarea name="note_text" rows="3" placeholder="Add a note..."></textarea>
+    <button type="submit">Add note</button>
+  </form>
+
+  {% if notes %}
+    <ul class="stack">
+      {% for note in notes %}
+        <li>
+          <p>{{ note.note_text }}</p>
+          <div class="muted">{{ note.created_at }}</div>
+        </li>
+      {% endfor %}
+    </ul>
+  {% else %}
+    <p>No notes yet.</p>
+  {% endif %}
+</section>
+{% endblock %}

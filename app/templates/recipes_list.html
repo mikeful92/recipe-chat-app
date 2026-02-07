@@ -1,0 +1,19 @@
+{% extends "base.html" %}
+{% block title %}Saved Recipes{% endblock %}
+{% block content %}
+<section class="card stack">
+  <h1>Saved Recipes</h1>
+  {% if recipes %}
+    <ul class="stack">
+      {% for recipe in recipes %}
+        <li>
+          <a href="/recipes/ui/{{ recipe.id }}">{{ recipe.title }}</a>
+          <div class="muted">{{ recipe.created_at }}</div>
+        </li>
+      {% endfor %}
+    </ul>
+  {% else %}
+    <p>No recipes saved yet.</p>
+  {% endif %}
+</section>
+{% endblock %}

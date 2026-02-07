@@ -3,8 +3,7 @@
 A private, single-user recipe generator you can use like ChatGPT: provide a theme + optional constraints (ingredients, healthy, quick/easy), get a structured recipe back, and save the ones you like with notes. Built to be mobile-friendly (laptop + iPad/iPhone) and designed to sit behind a private access layer (e.g., Cloudflare Access) so you do not have to build auth in-app.
 
 > Status: MVP in progress  
-> Implemented: `/health`, `/generate`, `/recipes`, `/recipes/{id}`, `/recipes/{id}/notes`  
-> Next: cook mode UI
+> Implemented: `/health`, `/`, `/ui/generate`, `/recipes/ui`, `/recipes/ui/{id}`, `/cook/{id}`, `/generate`, `/recipes`, `/recipes/{id}`, `/recipes/{id}/notes`
 
 ---
 
@@ -55,6 +54,8 @@ python -m pip install --upgrade pip
 ```bash
 pip install -r requirements-dev.txt
 ```
+
+This step is required before running `make ci` or `make dev`.
 
 ### 3. Run the app
 

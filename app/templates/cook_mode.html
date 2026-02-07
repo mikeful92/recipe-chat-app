@@ -1,0 +1,36 @@
+{% extends "base.html" %}
+{% block title %}Cook Mode{% endblock %}
+{% block content %}
+<section class="card stack">
+  <h1>Cook Mode: {{ recipe.title }}</h1>
+
+  <h2>Ingredients Checklist</h2>
+  <ul class="stack">
+    {% for item in recipe.cook_mode.ingredients_checklist %}
+      <li>
+        <label class="checkbox-row">
+          <input type="checkbox" />
+          {{ item }}
+        </label>
+      </li>
+    {% endfor %}
+  </ul>
+</section>
+
+<section class="card stack">
+  <h2>Steps</h2>
+  {% for step_text in recipe.cook_mode.step_cards %}
+    <article class="step-card{% if not loop.first %} hidden{% endif %}" data-step-card>
+      <p>{{ step_text }}</p>
+      <p class="muted">Step {{ loop.index }} of {{ recipe.cook_mode.step_cards|length }}</p>
+    </article>
+  {% endfor %}
+
+  <div class="actions">
+    <button type="button" id="prev-step">Prev</button>
+    <button type="button" id="next-step">Next</button>
+  </div>
+</section>
+
+<script src="/static/cook.js"></script>
+{% endblock %}

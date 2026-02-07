@@ -1,0 +1,43 @@
+{% extends "base.html" %}
+{% block title %}Generate Recipe{% endblock %}
+{% block content %}
+<section class="card generate-card">
+  <h1>Generate Recipe</h1>
+  <p class="muted">Fill in either field or both. Theme is optional, and ingredients can be a rough list.</p>
+  <form method="post" action="/ui/generate" class="stack generate-form">
+    <div class="form-field theme-field">
+      <label for="theme" class="field-label">Theme (What you want)</label>
+      <p class="field-help">Examples: Italian, weeknight, spicy, vegetarian.</p>
+      <input id="theme" type="text" name="theme" placeholder="Italian, weeknight, soup..." />
+    </div>
+
+    <div class="form-field ingredients-field">
+      <label for="ingredients" class="field-label">Ingredients (What you have)</label>
+      <p class="field-help">Enter one per line or comma-separated. Example below.</p>
+      <textarea
+        id="ingredients"
+        name="ingredients"
+        rows="6"
+        placeholder="chicken&#10;spinach&#10;lemon"
+      ></textarea>
+    </div>
+
+    <fieldset class="form-field">
+      <legend class="field-label">Preferences</legend>
+      <div class="stack compact">
+        <label class="checkbox-row">
+          <input type="checkbox" name="healthy" />
+          Prefer healthy
+        </label>
+
+        <label class="checkbox-row">
+          <input type="checkbox" name="quick_easy" />
+          Quick and easy
+        </label>
+      </div>
+    </fieldset>
+
+    <button type="submit" class="submit-btn">Generate Recipe</button>
+  </form>
+</section>
+{% endblock %}

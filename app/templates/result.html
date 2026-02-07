@@ -1,0 +1,30 @@
+{% extends "base.html" %}
+{% block title %}Recipe Result{% endblock %}
+{% block content %}
+<section class="card stack">
+  <h1>{{ recipe.title }}</h1>
+  <p><strong>Servings:</strong> {{ recipe.servings }} | <strong>Time:</strong> {{ recipe.time_minutes }} min | <strong>Difficulty:</strong> {{ recipe.difficulty }}</p>
+
+  <h2>Ingredients</h2>
+  <ul>
+    {% for ingredient in recipe.ingredients %}
+      <li>{{ ingredient.amount }} {{ ingredient.unit }} {{ ingredient.name }}</li>
+    {% endfor %}
+  </ul>
+
+  <h2>Steps</h2>
+  <ol>
+    {% for step in recipe.steps %}
+      <li>{{ step.text }}</li>
+    {% endfor %}
+  </ol>
+
+  <div class="actions">
+    <form method="post" action="/ui/save">
+      <textarea name="recipe_json" class="hidden-field">{{ recipe_json }}</textarea>
+      <button type="submit">Save recipe</button>
+    </form>
+  </div>
+  <p class="hint">Save this recipe first, then open cook mode from the saved recipe page.</p>
+</section>
+{% endblock %}

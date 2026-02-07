@@ -1,0 +1,21 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>{% block title %}Recipe Chat{% endblock %}</title>
+    <link rel="stylesheet" href="/static/styles.css?v=3" />
+  </head>
+  <body>
+    <header class="site-header">
+      <a href="/" class="brand">Recipe Chat</a>
+      <nav>
+        <a href="/">Generate</a>
+        <a href="/recipes/ui">Saved Recipes</a>
+      </nav>
+    </header>
+    <main class="container">
+      {% block content %}{% endblock %}
+    </main>
+  </body>
+</html>

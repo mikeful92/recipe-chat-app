@@ -1,0 +1,209 @@
+:root {
+  color-scheme: light;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  line-height: 1.4;
+  font-size: 16px;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  background: #f5f7fb;
+  color: #1b1f24;
+}
+
+.site-header {
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+  align-items: center;
+  padding: 1rem;
+  background: #fff;
+  border-bottom: 1px solid #dbe1ea;
+}
+
+.site-header nav {
+  display: flex;
+  gap: 0.75rem;
+}
+
+.brand,
+a {
+  color: #0a4f9e;
+  text-decoration: none;
+}
+
+.container {
+  max-width: 700px;
+  margin: 0 auto;
+  padding: 1rem 0.9rem;
+}
+
+.card {
+  background: #fff;
+  border: 1px solid #dbe1ea;
+  border-radius: 10px;
+  padding: 1rem;
+  margin-bottom: 1rem;
+  box-shadow: 0 1px 2px rgba(16, 24, 40, 0.04);
+}
+
+.stack > * + * {
+  margin-top: 0.75rem;
+}
+
+.form-field {
+  border: 1px solid #d8e0ec;
+  border-radius: 10px;
+  padding: 0.85rem;
+  background: #fbfcff;
+}
+
+.generate-form {
+  gap: 0.9rem;
+}
+
+.theme-field {
+  border-left: 5px solid #0a4f9e;
+}
+
+.ingredients-field {
+  border-left: 5px solid #2c8f57;
+}
+
+fieldset.form-field {
+  margin: 0;
+}
+
+.field-label {
+  font-weight: 700;
+  font-size: 1.02rem;
+  margin-bottom: 0.25rem;
+}
+
+.field-help {
+  margin: 0 0 0.5rem;
+  color: #5f6f84;
+  font-size: 0.9rem;
+}
+
+.compact > * + * {
+  margin-top: 0.5rem;
+}
+
+label,
+input,
+textarea,
+button {
+  display: block;
+  width: 100%;
+}
+
+input,
+textarea,
+button {
+  padding: 0.72rem;
+  border: 1px solid #c7d0dd;
+  border-radius: 8px;
+  font: inherit;
+}
+
+textarea {
+  min-height: 9rem;
+  resize: vertical;
+}
+
+input:focus,
+textarea:focus {
+  outline: 2px solid #8eb4df;
+  outline-offset: 1px;
+  border-color: #0a4f9e;
+}
+
+button,
+.button-link {
+  background: #0a4f9e;
+  color: #fff;
+  border: none;
+  padding: 0.65rem 0.9rem;
+  border-radius: 8px;
+  text-align: center;
+  cursor: pointer;
+}
+
+.button-link {
+  display: inline-block;
+}
+
+.actions {
+  display: flex;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+  align-items: center;
+}
+
+.checkbox-row {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.checkbox-row input[type="checkbox"] {
+  width: auto;
+}
+
+.submit-btn {
+  width: 100%;
+  font-weight: 600;
+}
+
+.step-card {
+  border: 1px solid #dbe1ea;
+  border-radius: 10px;
+  padding: 1.2rem;
+  font-size: 1.15rem;
+}
+
+.hidden {
+  display: none;
+}
+
+.hidden-field {
+  display: none;
+}
+
+.hint,
+.muted {
+  color: #5f6f84;
+  font-size: 0.9rem;
+}
+
+@media (max-width: 640px) {
+  .site-header {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .container {
+    padding: 0.8rem;
+  }
+
+  .card {
+    padding: 0.9rem;
+  }
+
+  h1 {
+    font-size: 1.35rem;
+  }
+
+  .actions > * {
+    width: 100%;
+  }
+
+  .step-card {
+    font-size: 1.05rem;
+  }
+}
