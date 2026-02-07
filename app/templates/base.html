@@ -4,17 +4,21 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>{% block title %}Recipe Chat{% endblock %}</title>
-    <link rel="stylesheet" href="/static/styles.css?v=3" />
+    <link rel="stylesheet" href="/static/styles.css?v=4" />
   </head>
   <body>
     <header class="site-header">
-      <a href="/" class="brand">Recipe Chat</a>
-      <nav>
-        <a href="/">Generate</a>
-        <a href="/recipes/ui">Saved Recipes</a>
-      </nav>
+      <div class="site-header-inner">
+        <a href="/" class="brand">Recipe Chat</a>
+        <nav aria-label="Primary">
+          <ul class="nav-list">
+            <li><a class="nav-link" href="/">Generate</a></li>
+            <li><a class="nav-link" href="/recipes/ui">Saved Recipes</a></li>
+          </ul>
+        </nav>
+      </div>
     </header>
-    <main class="container">
+    <main class="container content-stack">
       {% block content %}{% endblock %}
     </main>
   </body>
