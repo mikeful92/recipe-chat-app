@@ -142,6 +142,27 @@ def test_cook_mode_missing_recipe_returns_404(monkeypatch, tmp_path: Path) -> No
     asyncio.run(run())
 
 
+def test_saved_recipe_cook_mode_page_includes_title_and_first_step(
+    monkeypatch, tmp_path: Path
+) -> None:
+    _set_db(monkeypatch, tmp_path)
+    payload = _recipe_payload("cook-page-ui", "Cook Page UI Recipe")
+
+    async def run() -> None:
+        transport = httpx.ASGITransport(app=app)
+        async with httpx.AsyncClient(transport=transport, base_url="http://test") as client:
+            save_resp = await client.post("/recipes", json=payload)
+            assert save_resp.status_code == 200
+
+            cook_resp = await client.get("/cook/cook-page-ui")
+            assert cook_resp.status_code == 200
+            assert "Cook Page UI Recipe" in cook_resp.text
+            assert "Warm chickpeas." in cook_resp.text
+            assert 'href="/recipes/ui/cook-page-ui"' in cook_resp.text
+
+    asyncio.run(run())
+
+
 def test_ui_save_invalid_recipe_json_returns_400(monkeypatch, tmp_path: Path) -> None:
     _set_db(monkeypatch, tmp_path)
 

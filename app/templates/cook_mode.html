@@ -1,35 +1,40 @@
 {% extends "base.html" %}
 {% block title %}Cook Mode{% endblock %}
 {% block content %}
-<section class="card stack">
-  <h1>Cook Mode: {{ recipe.title }}</h1>
+<section class="cook-mode" data-cook-mode data-recipe-id="{{ recipe.id }}">
+  <header class="cook-header card">
+    <a class="cook-back-link" href="/recipes/ui/{{ recipe.id }}">Back to recipe</a>
+    <h1 class="cook-title">{{ recipe.title }}</h1>
+    <p class="muted" id="step-counter">Step 1 of {{ recipe.cook_mode.step_cards|length }}</p>
+  </header>
 
-  <h2>Ingredients Checklist</h2>
-  <ul class="stack">
-    {% for item in recipe.cook_mode.ingredients_checklist %}
-      <li>
-        <label class="checkbox-row">
-          <input type="checkbox" />
-          {{ item }}
-        </label>
-      </li>
+  <section class="card stack" aria-label="Ingredients checklist">
+    <h2>Ingredients Checklist</h2>
+    <ul class="stack cook-list">
+      {% for item in recipe.cook_mode.ingredients_checklist %}
+        <li>
+          <label class="checkbox-row">
+            <input type="checkbox" data-ingredient-index="{{ loop.index0 }}" />
+            {{ item }}
+          </label>
+        </li>
+      {% endfor %}
+    </ul>
+  </section>
+
+  <section class="card stack" aria-label="Step viewer">
+    <h2>Step Viewer</h2>
+    {% for step_text in recipe.cook_mode.step_cards %}
+      <article class="step-card{% if not loop.first %} hidden{% endif %}" data-step-card>
+        <p>{{ step_text }}</p>
+      </article>
     {% endfor %}
-  </ul>
-</section>
 
-<section class="card stack">
-  <h2>Steps</h2>
-  {% for step_text in recipe.cook_mode.step_cards %}
-    <article class="step-card{% if not loop.first %} hidden{% endif %}" data-step-card>
-      <p>{{ step_text }}</p>
-      <p class="muted">Step {{ loop.index }} of {{ recipe.cook_mode.step_cards|length }}</p>
-    </article>
-  {% endfor %}
-
-  <div class="actions">
-    <button type="button" id="prev-step">Prev</button>
-    <button type="button" id="next-step">Next</button>
-  </div>
+    <div class="actions cook-actions">
+      <button type="button" id="prev-step">Prev</button>
+      <button type="button" id="next-step">Next</button>
+    </div>
+  </section>
 </section>
 
 <script src="/static/cook.js"></script>

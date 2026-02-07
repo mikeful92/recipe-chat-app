@@ -181,6 +181,39 @@ button,
   font-size: 0.9rem;
 }
 
+.cook-mode {
+  display: grid;
+  gap: 0.85rem;
+}
+
+.cook-header {
+  position: sticky;
+  top: 0.5rem;
+  z-index: 3;
+  background: #fff;
+}
+
+.cook-title {
+  margin: 0;
+  font-size: 1.2rem;
+  line-height: 1.25;
+}
+
+.cook-back-link {
+  display: inline-block;
+  margin-bottom: 0.35rem;
+}
+
+.cook-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.cook-actions > * {
+  width: 100%;
+}
+
 @media (max-width: 640px) {
   .site-header {
     flex-direction: column;
@@ -205,5 +238,16 @@ button,
 
   .step-card {
     font-size: 1.05rem;
+  }
+}
+
+@media (min-width: 641px) {
+  .cook-header {
+    top: 0.8rem;
+  }
+
+  .cook-actions > * {
+    width: auto;
+    min-width: 7rem;
   }
 }
