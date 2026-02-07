@@ -3,8 +3,8 @@
 A private, single-user recipe generator you can use like ChatGPT: provide a theme + optional constraints (ingredients, healthy, quick/easy), get a structured recipe back, and save the ones you like with notes. Built to be mobile-friendly (laptop + iPad/iPhone) and designed to sit behind a private access layer (e.g., Cloudflare Access) so you do not have to build auth in-app.
 
 > Status: MVP in progress  
-> Implemented: `/health`, `/generate` (stubbed deterministic recipe output)  
-> Next: persistence (save recipes + notes) + cook mode UI
+> Implemented: `/health`, `/generate`, `/recipes`, `/recipes/{id}`, `/recipes/{id}/notes`  
+> Next: cook mode UI
 
 ---
 
@@ -35,7 +35,7 @@ A private, single-user recipe generator you can use like ChatGPT: provide a them
 - **Testing:** pytest (TDD workflow)
 - **Lint/Format:** Ruff
 - **Type checking:** mypy or pyright (depending on repo config)
-- **DB (next):** SQLite
+- **DB:** SQLite (`sqlite3` stdlib)
 - **CI:** GitHub Actions (runs lint + type checks + full test suite)
 
 ---
@@ -111,19 +111,29 @@ Full schema lives in: `app/schemas/recipe.py`
 
 ---
 
-## Persistence (next milestone)
+## Persistence API
 
-We will add SQLite-backed endpoints:
+SQLite-backed endpoints are implemented:
 
-- `POST /recipes` save a recipe
-- `GET /recipes` list saved recipes
-- `GET /recipes/{id}` fetch a recipe
-- `POST /recipes/{id}/notes` add a note/comment
-- `GET /recipes/{id}/notes` list notes
+- `POST /recipes` save a recipe body (`Recipe`), returns `{"id":"..."}`
+- `GET /recipes` list saved recipes (`id`, `title`, `created_at`) newest first
+- `GET /recipes/{id}` fetch full saved recipe
+- `POST /recipes/{id}/notes` save note body `{"note_text":"..."}`, returns `{"note_id":"..."}`
+- `GET /recipes/{id}/notes` list notes (`note_id`, `note_text`, `created_at`) newest first
 
-Database path will be configurable via:
+Behavior:
+
+- Duplicate recipe `id` on save returns `409`
+- Unknown recipe id returns `404` for recipe fetch and note endpoints
+
+Database path is configurable via:
 
 - `RECIPE_DB_PATH` (default: `data/recipes.db`)
+
+Initialization:
+
+- DB schema is initialized at app startup
+- Recipes are stored as JSON strings in `recipes.recipe_json`
 
 ---
 
