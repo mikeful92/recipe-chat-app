@@ -57,10 +57,31 @@ pip install -r requirements-dev.txt
 
 This step is required before running `make ci` or `make dev`.
 
+### Environment variables
+
+- `RECIPE_GENERATOR`:
+  - `stub` (default): deterministic local generator
+  - `openai`: OpenAI-backed generator
+- `OPENAI_MODEL`:
+  - Optional model name for OpenAI generation
+  - Default: `gpt-4.1-mini`
+- `OPENAI_API_KEY`:
+  - Required when `RECIPE_GENERATOR=openai`
+  - App startup fails if missing in OpenAI mode
+- `RECIPE_DB_PATH`:
+  - Optional SQLite DB path
+  - Default: `data/recipes.db`
+
 ### 3. Run the app
 
 ```bash
 make dev
+```
+
+If you want a custom port (for example `8080`):
+
+```bash
+uvicorn app.main:app --reload --host 0.0.0.0 --port 8080
 ```
 
 Open:
@@ -88,7 +109,19 @@ Returns:
 
 ### `POST /generate`
 
-Deterministic stub generator (no OpenAI calls yet). Produces a recipe that matches the strict schema.
+Generator backend is selected by `RECIPE_GENERATOR`:
+
+- `stub` (default): deterministic local generator
+- `openai`: OpenAI Responses API with structured outputs
+
+Both return a strict `Recipe` schema response.
+
+Runtime behavior:
+
+- OpenAI mode applies request timeout + retry/backoff for transient API failures.
+- OpenAI responses are validated against `Recipe` and retried once if schema validation fails.
+- `id` is generated server-side.
+- Non-retryable generator failures currently return HTTP `500`.
 
 Example:
 
@@ -146,6 +179,12 @@ This app is intended to be reachable only through a private access layer (VPN-is
 
 The app itself will not store passwords. Secrets (OpenAI key, etc.) are server-side env vars only.
 
+Local secret handling:
+
+- `.env` is ignored by git.
+- `.env.example` is safe to commit and should not contain secrets.
+- If a key is ever exposed in logs/chat/screenshot history, rotate it immediately.
+
 ---
 
 ## Repo Commands
@@ -172,6 +211,21 @@ We use a TDD-first workflow:
 - `make ci` must pass before committing
 
 Codex instructions live in `.codex/` and/or `INSTRUCTIONS.md`.
+
+Test note:
+
+- Test suite forces `RECIPE_GENERATOR=stub` for determinism, so CI does not depend on external APIs.
+
+---
+
+## Future Improvements
+
+- Add explicit API error contract for generation failures (e.g., typed `502/503` responses instead of generic `500`).
+- Add request tracing IDs and structured logging fields for easier production debugging.
+- Support `.env` loading via app config to reduce shell setup friction in local dev.
+- Add optional fallback mode: if OpenAI fails, return stub output with a warning banner.
+- Add model guardrails for cost controls (request budgets, per-day caps, and model allowlist).
+- Add end-to-end integration test (mock server) for OpenAI path with realistic Responses API payloads.
 
 ---
 

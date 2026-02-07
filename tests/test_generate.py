@@ -64,3 +64,20 @@ def test_generate_rejects_invalid_payload_shape() -> None:
         assert resp.status_code == 422
 
     asyncio.run(run())
+
+
+def test_generate_returns_500_when_generator_raises_runtime_failure(monkeypatch) -> None:
+    class BrokenGenerator:
+        def generate(self, _request):
+            raise RuntimeError("non-retryable backend failure")
+
+    monkeypatch.setattr("app.api.generate.get_generator", lambda: BrokenGenerator())
+
+    async def run() -> None:
+        transport = httpx.ASGITransport(app=app, raise_app_exceptions=False)
+        async with httpx.AsyncClient(transport=transport, base_url="http://test") as client:
+            resp = await client.post("/generate", json={"ingredients": ["chicken"]})
+        assert resp.status_code == 500
+        assert "Internal Server Error" in resp.text
+
+    asyncio.run(run())

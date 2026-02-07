@@ -52,13 +52,22 @@ If this does not include `.venv`, stop and activate the venv.
 ## 3) API & persistence notes
 
 - `POST /generate` uses strict Pydantic schemas (`extra="forbid"`).
-- Generator is deterministic stub logic (no OpenAI call yet).
+- Recipe generation is config-driven:
+  - `RECIPE_GENERATOR=stub` (default deterministic behavior)
+  - `RECIPE_GENERATOR=openai` (OpenAI Responses API with structured outputs)
+  - `OPENAI_API_KEY` is required when OpenAI mode is enabled.
+- UI generation (`POST /ui/generate`) uses the same generator selection path as `POST /generate`.
 - If you change the recipe schema, update all three:
   - `app/schemas/recipe.py`
   - `app/api/generate.py`
   - `tests/test_generate.py`
+- If generator behavior changes, also update:
+  - `app/api/ui.py`
+  - `tests/test_generator_openai.py`
+  - `tests/test_generator_factory.py`
 - Persistence is SQLite via stdlib `sqlite3` (`app/db/sqlite.py`).
 - Saved recipe + notes routes:
   - `app/api/recipes.py`
   - `tests/test_recipes.py`
 - If persistence behavior changes, update README API docs and persistence tests.
+- Keep test runs deterministic: tests force stub generator mode via `tests/conftest.py`.

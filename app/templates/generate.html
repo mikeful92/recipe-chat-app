@@ -4,6 +4,9 @@
 <section class="card generate-card">
   <h1>Generate Recipe</h1>
   <p class="muted">Fill in either field or both. Theme is optional, and ingredients can be a rough list.</p>
+  {% if error_message %}
+  <p role="alert" class="muted">Something went wrong while generating your recipe. Please try again.</p>
+  {% endif %}
   <form method="post" action="/ui/generate" class="stack generate-form">
     <div class="form-field theme-field">
       <label for="theme" class="field-label">Theme (What you want)</label>

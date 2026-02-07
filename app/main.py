@@ -7,11 +7,15 @@ from fastapi.staticfiles import StaticFiles
 from app.api.generate import router as generate_router
 from app.api.recipes import router as recipes_router
 from app.api.ui import router as ui_router
+from app.core.config import get_settings
 from app.db.sqlite import init_db
+from app.services.generator_factory import get_generator
 
 
 @asynccontextmanager
 async def lifespan(_: FastAPI) -> AsyncIterator[None]:
+    settings = get_settings()
+    get_generator(settings)
     init_db()
     yield
 

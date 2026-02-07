@@ -8,3 +8,8 @@ __pycache__/
 
 data/
 *.db
+
+# Local environment files
+.env
+.env.*
+!.env.example

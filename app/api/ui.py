@@ -1,3 +1,4 @@
+import logging
 from typing import Any
 
 from fastapi import APIRouter, Form, HTTPException, Request
@@ -14,10 +15,11 @@ from app.api.recipes import (
     save_recipe,
 )
 from app.schemas.recipe import Recipe, RecipeRequest
-from app.services.recipe_builder import build_recipe
+from app.services.generator_factory import get_generator
 
 router = APIRouter()
 templates = Jinja2Templates(directory="app/templates")
+logger = logging.getLogger(__name__)
 
 
 def _parse_ingredients(raw: str) -> list[str]:
@@ -27,7 +29,8 @@ def _parse_ingredients(raw: str) -> list[str]:
 
 @router.get("/")
 async def generate_page(request: Request) -> Any:
-    return templates.TemplateResponse(request, "generate.html")
+    has_error = request.query_params.get("error") == "1"
+    return templates.TemplateResponse(request, "generate.html", {"error_message": has_error})
 
 
 @router.post("/ui/generate")
@@ -44,7 +47,20 @@ async def generate_from_form(
         healthy=healthy is not None,
         quick_easy=quick_easy is not None,
     )
-    recipe = build_recipe(recipe_request)
+    try:
+        recipe = get_generator().generate(recipe_request)
+    except Exception:
+        logger.exception(
+            "Recipe generation failed from UI form",
+            extra={
+                "has_theme": recipe_request.theme is not None,
+                "ingredients_count": len(recipe_request.ingredients),
+                "healthy": recipe_request.healthy,
+                "quick_easy": recipe_request.quick_easy,
+            },
+        )
+        return RedirectResponse(url="/?error=1", status_code=303)
+
     return templates.TemplateResponse(
         request,
         "result.html",

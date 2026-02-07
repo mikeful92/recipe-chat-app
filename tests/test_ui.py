@@ -63,3 +63,32 @@ def test_ui_generate_then_api_save_then_cook_page(monkeypatch, tmp_path: Path) -
             assert "Cook Mode" in cook_resp.text
 
     asyncio.run(run())
+
+
+def test_ui_generate_failure_redirects_to_form_with_generic_error(
+    monkeypatch, tmp_path: Path
+) -> None:
+    _set_db(monkeypatch, tmp_path)
+
+    class BrokenGenerator:
+        def generate(self, _request):
+            raise RuntimeError("boom")
+
+    monkeypatch.setattr("app.api.ui.get_generator", lambda: BrokenGenerator())
+
+    async def run() -> None:
+        transport = httpx.ASGITransport(app=app)
+        async with httpx.AsyncClient(transport=transport, base_url="http://test") as client:
+            resp = await client.post(
+                "/ui/generate",
+                data={"theme": "Italian", "ingredients": "chicken"},
+                follow_redirects=False,
+            )
+            assert resp.status_code == 303
+            assert resp.headers["location"] == "/?error=1"
+
+            page = await client.get(resp.headers["location"])
+            assert page.status_code == 200
+            assert "Something went wrong while generating your recipe." in page.text
+
+    asyncio.run(run())
