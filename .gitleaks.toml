@@ -1,0 +1,20 @@
+[extend]
+useDefault = true
+
+[[rules]]
+id = "openai-api-key"
+description = "OpenAI API key"
+regex = '''\bsk-(?:proj|live|test)-[A-Za-z0-9_-]{20,}\b|\bsk-[A-Za-z0-9]{32,}\b'''
+keywords = [
+  "sk-proj-",
+  "sk-live-",
+  "sk-test-",
+  "openai",
+]
+
+[allowlist]
+description = "Allow placeholder values in docs and examples"
+paths = [
+  '''(^|/)\.env\.example$''',
+  '''(^|/)README\.md$''',
+]
