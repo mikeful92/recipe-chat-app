@@ -36,6 +36,7 @@
   const render = () => {
     cards.forEach((card, i) => {
       card.classList.toggle("hidden", i !== index);
+      card.setAttribute("aria-hidden", i !== index ? "true" : "false");
     });
     if (stepCounter) {
       stepCounter.textContent = `Step ${index + 1} of ${cards.length}`;
@@ -74,6 +75,19 @@
 
   nextBtn.addEventListener("click", () => {
     if (index < cards.length - 1) {
+      index += 1;
+      saveStep();
+      render();
+    }
+  });
+
+  document.addEventListener("keydown", (event) => {
+    if (event.key === "ArrowLeft" && index > 0) {
+      index -= 1;
+      saveStep();
+      render();
+    }
+    if (event.key === "ArrowRight" && index < cards.length - 1) {
       index += 1;
       saveStep();
       render();

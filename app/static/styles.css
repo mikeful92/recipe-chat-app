@@ -133,6 +133,7 @@ a:hover {
   background: var(--color-surface);
   box-shadow: var(--shadow-sm);
   padding: var(--space-5);
+  animation: card-in 180ms ease-out;
 }
 
 .panel {
@@ -262,6 +263,11 @@ a:hover {
 
 .btn:active {
   transform: translateY(1px);
+}
+
+.btn:disabled {
+  cursor: not-allowed;
+  opacity: 0.65;
 }
 
 .btn-primary {
@@ -431,6 +437,18 @@ a:hover {
   display: none;
 }
 
+@keyframes card-in {
+  from {
+    opacity: 0;
+    transform: translateY(4px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
 @media (max-width: 760px) {
   .site-header-inner {
     flex-direction: column;
@@ -447,5 +465,14 @@ a:hover {
 
   .actions > * {
     width: 100%;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0ms !important;
+    transition-duration: 0ms !important;
   }
 }
