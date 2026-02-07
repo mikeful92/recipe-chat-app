@@ -1,46 +1,59 @@
 {% extends "base.html" %}
+{% import "components.html" as ui %}
 {% block title %}Generate Recipe{% endblock %}
 {% block content %}
-<section class="card generate-card">
-  <h1>Generate Recipe</h1>
-  <p class="muted">Fill in either field or both. Theme is optional, and ingredients can be a rough list.</p>
+<section class="card stack">
+  {{ ui.page_header("Generate Recipe", "Start with a theme, ingredients, or both. We will turn it into a complete recipe with cook mode.", "Recipe Builder") }}
+
   {% if error_message %}
-  <p role="alert" class="muted">Something went wrong while generating your recipe. Please try again.</p>
+    <div class="alert alert-error" role="status" aria-live="polite">
+      Something went wrong while generating your recipe. Please try again with a simpler prompt.
+    </div>
   {% endif %}
-  <form method="post" action="/ui/generate" class="stack generate-form">
-    <div class="form-field theme-field">
-      <label for="theme" class="field-label">Theme (What you want)</label>
+
+  <form method="post" action="/ui/generate" class="stack" data-loading-form>
+    <div class="panel">
+      <label for="theme" class="field-label">Theme</label>
       <p class="field-help">Examples: Italian, weeknight, spicy, vegetarian.</p>
-      <input id="theme" type="text" name="theme" placeholder="Italian, weeknight, soup..." />
+      <input
+        id="theme"
+        class="input"
+        type="text"
+        name="theme"
+        placeholder="Italian, weeknight, soup..."
+        autocomplete="off"
+      />
     </div>
 
-    <div class="form-field ingredients-field">
-      <label for="ingredients" class="field-label">Ingredients (What you have)</label>
-      <p class="field-help">Enter one per line or comma-separated. Example below.</p>
+    <div class="panel">
+      <label for="ingredients" class="field-label">Ingredients</label>
+      <p class="field-help">Enter one per line or comma-separated.</p>
       <textarea
         id="ingredients"
+        class="textarea"
         name="ingredients"
         rows="6"
         placeholder="chicken&#10;spinach&#10;lemon"
       ></textarea>
     </div>
 
-    <fieldset class="form-field">
+    <fieldset class="panel compact">
       <legend class="field-label">Preferences</legend>
-      <div class="stack compact">
-        <label class="checkbox-row">
-          <input type="checkbox" name="healthy" />
-          Prefer healthy
-        </label>
-
-        <label class="checkbox-row">
-          <input type="checkbox" name="quick_easy" />
-          Quick and easy
-        </label>
-      </div>
+      <label class="checkbox-row">
+        <input type="checkbox" name="healthy" />
+        Prefer healthy
+      </label>
+      <label class="checkbox-row">
+        <input type="checkbox" name="quick_easy" />
+        Quick and easy
+      </label>
     </fieldset>
 
-    <button type="submit" class="submit-btn">Generate Recipe</button>
+    <button type="submit" class="btn btn-primary btn-block" data-submit-label="Generate Recipe">
+      Generate Recipe
+    </button>
   </form>
 </section>
+
+<script src="/static/ui.js"></script>
 {% endblock %}

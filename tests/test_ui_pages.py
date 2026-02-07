@@ -43,6 +43,9 @@ def test_root_includes_multiline_ingredients_placeholder(monkeypatch, tmp_path: 
             resp = await client.get("/")
             assert resp.status_code == 200
             assert "placeholder=\"chicken&#10;spinach&#10;lemon\"" in resp.text
+            assert "class=\"page-header\"" in resp.text
+            assert "class=\"input\"" in resp.text
+            assert "class=\"textarea\"" in resp.text
 
     asyncio.run(run())
 
@@ -98,7 +101,22 @@ def test_recipes_ui_lists_newest_first(monkeypatch, tmp_path: Path) -> None:
             list_resp = await client.get("/recipes/ui")
             assert list_resp.status_code == 200
             body = list_resp.text
+            assert "class=\"recipe-list\"" in body
             assert body.index("Newer UI Recipe") < body.index("Older UI Recipe")
+
+    asyncio.run(run())
+
+
+def test_generate_page_shows_error_alert_from_query_param(monkeypatch, tmp_path: Path) -> None:
+    _set_db(monkeypatch, tmp_path)
+
+    async def run() -> None:
+        transport = httpx.ASGITransport(app=app)
+        async with httpx.AsyncClient(transport=transport, base_url="http://test") as client:
+            resp = await client.get("/?error=1")
+            assert resp.status_code == 200
+            assert "class=\"alert alert-error\"" in resp.text
+            assert "Something went wrong while generating your recipe." in resp.text
 
     asyncio.run(run())
 
@@ -126,6 +144,22 @@ def test_recipe_detail_ui_shows_notes_and_add_note_form(monkeypatch, tmp_path: P
             assert detail_resp.status_code == 200
             assert "Add note" in detail_resp.text
             assert "Nice with extra lemon" in detail_resp.text
+            assert "class=\"note-list\"" in detail_resp.text
+
+    asyncio.run(run())
+
+
+def test_saved_recipes_empty_state_has_primary_cta(monkeypatch, tmp_path: Path) -> None:
+    _set_db(monkeypatch, tmp_path)
+
+    async def run() -> None:
+        transport = httpx.ASGITransport(app=app)
+        async with httpx.AsyncClient(transport=transport, base_url="http://test") as client:
+            resp = await client.get("/recipes/ui")
+            assert resp.status_code == 200
+            assert "No recipes saved yet." in resp.text
+            assert "Generate your first recipe" in resp.text
+            assert "class=\"empty-state\"" in resp.text
 
     asyncio.run(run())
 

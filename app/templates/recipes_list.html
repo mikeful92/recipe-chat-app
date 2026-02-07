@@ -1,19 +1,27 @@
 {% extends "base.html" %}
+{% import "components.html" as ui %}
 {% block title %}Saved Recipes{% endblock %}
 {% block content %}
 <section class="card stack">
-  <h1>Saved Recipes</h1>
+  {{ ui.page_header("Saved Recipes", "Your generated recipes, ordered by newest first.", "Library") }}
+
   {% if recipes %}
-    <ul class="stack">
+    <ul class="recipe-list" aria-label="Saved recipes">
       {% for recipe in recipes %}
         <li>
-          <a href="/recipes/ui/{{ recipe.id }}">{{ recipe.title }}</a>
-          <div class="muted">{{ recipe.created_at }}</div>
+          <a class="list-title" href="/recipes/ui/{{ recipe.id }}">{{ recipe.title }}</a>
+          <div class="list-meta">Saved {{ recipe.created_at }}</div>
         </li>
       {% endfor %}
     </ul>
   {% else %}
-    <p>No recipes saved yet.</p>
+    <div class="empty-state" role="status">
+      <p>No recipes saved yet.</p>
+      <p class="muted">Generate and save one to unlock notes and cook mode.</p>
+      <div class="actions">
+        <a class="btn btn-primary" href="/">Generate your first recipe</a>
+      </div>
+    </div>
   {% endif %}
 </section>
 {% endblock %}

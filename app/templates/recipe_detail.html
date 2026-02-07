@@ -1,45 +1,67 @@
 {% extends "base.html" %}
+{% import "components.html" as ui %}
 {% block title %}Recipe Detail{% endblock %}
 {% block content %}
 <section class="card stack">
-  <h1>{{ recipe.title }}</h1>
-  <p><strong>Servings:</strong> {{ recipe.servings }} | <strong>Time:</strong> {{ recipe.time_minutes }} min</p>
+  {{ ui.page_header(recipe.title, "Saved recipe details, notes, and cook-mode launch.", "Recipe") }}
 
-  <h2>Ingredients</h2>
-  <ul>
-    {% for ingredient in recipe.ingredients %}
-      <li>{{ ingredient.amount }} {{ ingredient.unit }} {{ ingredient.name }}</li>
-    {% endfor %}
+  <ul class="meta-pills" aria-label="Recipe metadata">
+    <li class="meta-pill"><strong>Servings:</strong> {{ recipe.servings }}</li>
+    <li class="meta-pill"><strong>Time:</strong> {{ recipe.time_minutes }} min</li>
+    <li class="meta-pill"><strong>Difficulty:</strong> {{ recipe.difficulty }}</li>
   </ul>
 
-  <h2>Steps</h2>
-  <ol>
-    {% for step in recipe.steps %}
-      <li>{{ step.text }}</li>
-    {% endfor %}
-  </ol>
+  <section class="stack">
+    <h2 class="section-title">Ingredients</h2>
+    <ul>
+      {% for ingredient in recipe.ingredients %}
+        <li>{{ ingredient.amount }} {{ ingredient.unit }} {{ ingredient.name }}</li>
+      {% endfor %}
+    </ul>
+  </section>
+
+  <section class="stack">
+    <h2 class="section-title">Steps</h2>
+    <ol class="step-list">
+      {% for step in recipe.steps %}
+        <li>{{ step.text }}</li>
+      {% endfor %}
+    </ol>
+  </section>
 
   <div class="actions">
-    <a class="button-link" href="/cook/{{ recipe.id }}">View cook mode</a>
+    <a class="btn btn-primary" href="/cook/{{ recipe.id }}">Open Cook Mode</a>
   </div>
+</section>
 
-  <h2>Notes</h2>
-  <form method="post" action="/recipes/ui/{{ recipe.id }}/notes" class="stack">
-    <textarea name="note_text" rows="3" placeholder="Add a note..."></textarea>
-    <button type="submit">Add note</button>
+<section class="card stack">
+  <header>
+    <h2 class="section-title">Notes</h2>
+    <p class="page-subtitle">Capture tweaks, reminders, and ingredient swaps.</p>
+  </header>
+
+  <form method="post" action="/recipes/ui/{{ recipe.id }}/notes" class="stack" data-loading-form>
+    <label class="field-label" for="note-text">Add note</label>
+    <textarea id="note-text" class="textarea" name="note_text" rows="3" placeholder="Add a note..."></textarea>
+    <button type="submit" class="btn btn-secondary" data-submit-label="Add Note">Add note</button>
   </form>
 
   {% if notes %}
-    <ul class="stack">
+    <ul class="note-list" aria-label="Saved notes">
       {% for note in notes %}
         <li>
           <p>{{ note.note_text }}</p>
-          <div class="muted">{{ note.created_at }}</div>
+          <div class="list-meta">{{ note.created_at }}</div>
         </li>
       {% endfor %}
     </ul>
   {% else %}
-    <p>No notes yet.</p>
+    <div class="empty-state">
+      <p>No notes yet.</p>
+      <p class="muted">Add your first note above to remember adjustments.</p>
+    </div>
   {% endif %}
 </section>
+
+<script src="/static/ui.js"></script>
 {% endblock %}

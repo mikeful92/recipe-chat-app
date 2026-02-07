@@ -1,30 +1,44 @@
 {% extends "base.html" %}
+{% import "components.html" as ui %}
 {% block title %}Recipe Result{% endblock %}
 {% block content %}
 <section class="card stack">
-  <h1>{{ recipe.title }}</h1>
-  <p><strong>Servings:</strong> {{ recipe.servings }} | <strong>Time:</strong> {{ recipe.time_minutes }} min | <strong>Difficulty:</strong> {{ recipe.difficulty }}</p>
+  {{ ui.page_header(recipe.title, "Review the output, then save it to use cook mode and notes.", "Generated") }}
 
-  <h2>Ingredients</h2>
-  <ul>
-    {% for ingredient in recipe.ingredients %}
-      <li>{{ ingredient.amount }} {{ ingredient.unit }} {{ ingredient.name }}</li>
-    {% endfor %}
+  <ul class="meta-pills" aria-label="Recipe metadata">
+    <li class="meta-pill"><strong>Servings:</strong> {{ recipe.servings }}</li>
+    <li class="meta-pill"><strong>Time:</strong> {{ recipe.time_minutes }} min</li>
+    <li class="meta-pill"><strong>Difficulty:</strong> {{ recipe.difficulty }}</li>
   </ul>
 
-  <h2>Steps</h2>
-  <ol>
-    {% for step in recipe.steps %}
-      <li>{{ step.text }}</li>
-    {% endfor %}
-  </ol>
+  <section class="stack">
+    <h2 class="section-title">Ingredients</h2>
+    <ul>
+      {% for ingredient in recipe.ingredients %}
+        <li>{{ ingredient.amount }} {{ ingredient.unit }} {{ ingredient.name }}</li>
+      {% endfor %}
+    </ul>
+  </section>
+
+  <section class="stack">
+    <h2 class="section-title">Steps</h2>
+    <ol class="step-list">
+      {% for step in recipe.steps %}
+        <li>{{ step.text }}</li>
+      {% endfor %}
+    </ol>
+  </section>
 
   <div class="actions">
-    <form method="post" action="/ui/save">
+    <form method="post" action="/ui/save" data-loading-form>
       <textarea name="recipe_json" class="hidden-field">{{ recipe_json }}</textarea>
-      <button type="submit">Save recipe</button>
+      <button type="submit" class="btn btn-primary" data-submit-label="Save recipe">Save recipe</button>
     </form>
+    <a class="btn btn-secondary" href="/">Generate Another</a>
   </div>
-  <p class="hint">Save this recipe first, then open cook mode from the saved recipe page.</p>
+
+  <p class="muted">Tip: save first, then open cook mode from the saved recipe page.</p>
 </section>
+
+<script src="/static/ui.js"></script>
 {% endblock %}
