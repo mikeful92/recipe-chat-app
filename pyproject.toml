@@ -10,3 +10,5 @@ ignore = ["E501"]
 pythonVersion = "3.11"
 typeCheckingMode = "basic"
 reportMissingTypeStubs = "none"
+venvPath = "."
+venv = ".venv"
