@@ -13,13 +13,14 @@ def _set_db(monkeypatch, tmp_path: Path) -> None:
     init_db()
 
 
-def _recipe_payload(recipe_id: str, title: str) -> dict:
+def _recipe_payload(recipe_id: str, title: str, dish_summary: str = "A cozy, fast dish.") -> dict:
     return {
         "id": recipe_id,
         "title": title,
         "servings": 2,
         "time_minutes": 20,
         "difficulty": "easy",
+        "dish_summary": dish_summary,
         "ingredients": [
             {"name": "chickpeas", "amount": "1", "unit": "can", "optional": False},
         ],
@@ -142,6 +143,8 @@ def test_recipe_detail_ui_shows_notes_and_add_note_form(monkeypatch, tmp_path: P
 
             detail_resp = await client.get("/recipes/ui/note-ui")
             assert detail_resp.status_code == 200
+            assert "A cozy, fast dish." in detail_resp.text
+            assert detail_resp.text.index("A cozy, fast dish.") < detail_resp.text.index("Ingredients")
             assert "Add note" in detail_resp.text
             assert "Nice with extra lemon" in detail_resp.text
             assert "class=\"note-list\"" in detail_resp.text
@@ -191,8 +194,26 @@ def test_saved_recipe_cook_mode_page_includes_title_and_first_step(
             cook_resp = await client.get("/cook/cook-page-ui")
             assert cook_resp.status_code == 200
             assert "Cook Page UI Recipe" in cook_resp.text
+            assert "A cozy, fast dish." in cook_resp.text
+            assert cook_resp.text.index("A cozy, fast dish.") < cook_resp.text.index(
+                "Ingredients Checklist"
+            )
             assert "Warm chickpeas." in cook_resp.text
             assert 'href="/recipes/ui/cook-page-ui"' in cook_resp.text
+
+    asyncio.run(run())
+
+
+def test_saved_recipe_without_summary_is_rejected(monkeypatch, tmp_path: Path) -> None:
+    _set_db(monkeypatch, tmp_path)
+    payload = _recipe_payload("missing-summary-ui", "Missing Summary UI Recipe")
+    payload.pop("dish_summary")
+
+    async def run() -> None:
+        transport = httpx.ASGITransport(app=app)
+        async with httpx.AsyncClient(transport=transport, base_url="http://test") as client:
+            save_resp = await client.post("/recipes", json=payload)
+            assert save_resp.status_code == 422
 
     asyncio.run(run())
 

@@ -139,7 +139,7 @@ curl -sS -X POST http://localhost:8000/generate \
 
 The API returns a `Recipe` JSON object containing:
 
-- `id`, `title`, `servings`, `time_minutes`, `difficulty`
+- `id`, `title`, `servings`, `time_minutes`, `difficulty`, `dish_summary`
 - `ingredients[]` (`name`, `amount`, `unit`, optional)
 - `steps[]` (`step`, `text`, `timer_minutes?`)
 - `substitutions[]`
@@ -162,6 +162,7 @@ SQLite-backed endpoints are implemented:
 Behavior:
 
 - Duplicate recipe `id` on save returns `409`
+- Missing required recipe fields (including `dish_summary`) return `422`
 - Unknown recipe id returns `404` for recipe fetch and note endpoints
 
 Database path is configurable via:

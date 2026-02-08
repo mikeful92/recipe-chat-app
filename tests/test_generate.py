@@ -29,6 +29,8 @@ def test_generate_happy_path_returns_200_and_schema_shape() -> None:
         assert isinstance(body["ingredients"], list)
         assert isinstance(body["steps"], list)
         assert isinstance(body["substitutions"], list)
+        assert isinstance(body["dish_summary"], str)
+        assert body["dish_summary"]
         assert isinstance(body["cook_mode"], dict)
         assert isinstance(body["cook_mode"]["ingredients_checklist"], list)
         assert isinstance(body["cook_mode"]["step_cards"], list)

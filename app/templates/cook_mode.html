@@ -6,6 +6,9 @@
     <a class="btn btn-quiet" href="/recipes/ui/{{ recipe.id }}">Back to recipe</a>
     <h1 class="cook-title">{{ recipe.title }}</h1>
     <p class="muted" id="step-counter">Step 1 of {{ recipe.cook_mode.step_cards|length }}</p>
+    <section class="stack">
+      <p>{{ recipe.dish_summary }}</p>
+    </section>
   </header>
 
   <section class="card stack" aria-label="Ingredients checklist">

@@ -1,4 +1,6 @@
-from pydantic import BaseModel, ConfigDict, Field
+from typing import Any
+
+from pydantic import BaseModel, ConfigDict, Field, field_validator
 
 
 class RecipeRequest(BaseModel):
@@ -43,7 +45,16 @@ class Recipe(BaseModel):
     servings: int
     time_minutes: int
     difficulty: str
+    dish_summary: str = Field(min_length=1, max_length=320)
     ingredients: list[RecipeIngredient]
     steps: list[RecipeStep]
     substitutions: list[str]
     cook_mode: CookMode
+
+    @field_validator("dish_summary", mode="before")
+    @classmethod
+    def normalize_dish_summary(cls, value: Any) -> Any:
+        if not isinstance(value, str):
+            return value
+        cleaned = value.strip()
+        return cleaned

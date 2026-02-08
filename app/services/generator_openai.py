@@ -138,7 +138,8 @@ class OpenAIRecipeGenerator:
     ) -> dict[str, Any]:
         prompt = (
             "Generate a recipe JSON object that strictly matches the provided JSON schema. "
-            "No extra keys. Keep ingredient and step order logical."
+            "No extra keys. Keep ingredient and step order logical. "
+            "Set dish_summary to a concise 1-3 sentence summary (max 320 chars)."
         )
 
         request_json = json.dumps(request.model_dump(), ensure_ascii=True)

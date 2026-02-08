@@ -42,6 +42,12 @@ def test_ui_generate_then_api_save_then_cook_page(monkeypatch, tmp_path: Path) -
                 },
             )
             assert generate_ui_resp.status_code == 200
+            assert "A italian dish featuring chicken, spinach with straightforward prep." in generate_ui_resp.text
+            assert generate_ui_resp.text.index(
+                "A italian dish featuring chicken, spinach with straightforward prep."
+            ) < generate_ui_resp.text.index(
+                "Ingredients"
+            )
             assert "Save recipe" in generate_ui_resp.text
 
             generate_api_resp = await client.post(

@@ -14,6 +14,7 @@ def _recipe_payload(recipe_id: str = "recipe-1") -> dict:
         "servings": 2,
         "time_minutes": 20,
         "difficulty": "easy",
+        "dish_summary": "A bright, quick bowl with lemony chickpeas for a fast meal.",
         "ingredients": [
             {"name": "chickpeas", "amount": "1", "unit": "can", "optional": False},
             {"name": "lemon", "amount": "1", "unit": "item", "optional": False},
@@ -84,8 +85,23 @@ def test_save_then_get_returns_recipe_with_cook_mode(monkeypatch, tmp_path: Path
             assert get_resp.status_code == 200
             body = get_resp.json()
             assert body["title"] == payload["title"]
+            assert body["dish_summary"] == payload["dish_summary"]
             assert "cook_mode" in body
             assert "ingredients_checklist" in body["cook_mode"]
+
+    asyncio.run(run())
+
+
+def test_save_recipe_without_summary_returns_422(monkeypatch, tmp_path: Path) -> None:
+    _set_db(monkeypatch, tmp_path)
+    payload = _recipe_payload("missing-summary")
+    payload.pop("dish_summary")
+
+    async def run() -> None:
+        transport = httpx.ASGITransport(app=app)
+        async with httpx.AsyncClient(transport=transport, base_url="http://test") as client:
+            save_resp = await client.post("/recipes", json=payload)
+            assert save_resp.status_code == 422
 
     asyncio.run(run())
 

@@ -29,6 +29,10 @@ class StubRecipeGenerator:
             ingredients_checklist=[f"Gather {name}" for name in ingredient_names],
             step_cards=[step.text for step in steps],
         )
+        summary_ingredients = ", ".join(ingredient_names[:2])
+        dish_summary = (
+            f"A {title_theme.lower()} dish featuring {summary_ingredients} with straightforward prep."
+        )
 
         raw_id = "|".join(
             [
@@ -46,6 +50,7 @@ class StubRecipeGenerator:
             servings=2,
             time_minutes=20 if request.quick_easy else 35,
             difficulty="easy" if request.quick_easy else "medium",
+            dish_summary=dish_summary,
             ingredients=ingredients,
             steps=steps,
             substitutions=substitutions,

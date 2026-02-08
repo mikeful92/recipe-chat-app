@@ -53,6 +53,7 @@ def _valid_recipe_payload() -> dict:
         "servings": 2,
         "time_minutes": 20,
         "difficulty": "easy",
+        "dish_summary": "A cozy tomato basil pasta with simple prep and bright flavor.",
         "ingredients": [
             {"name": "tomato", "amount": "2", "unit": "item", "optional": False},
             {"name": "basil", "amount": "5", "unit": "leaf", "optional": False},
@@ -77,8 +78,11 @@ def test_openai_generator_returns_valid_recipe_and_overrides_id() -> None:
 
     assert recipe.title == "Tomato Basil Pasta"
     assert recipe.id != "model-provided-id"
+    assert recipe.dish_summary == "A cozy tomato basil pasta with simple prep and bright flavor."
     assert len(client.responses.calls) == 1
     sent_schema = client.responses.calls[0]["text"]["format"]["schema"]
+    assert "dish_summary" in sent_schema["properties"]
+    assert "dish_summary" in sent_schema["required"]
     ingredient_schema = sent_schema["$defs"]["RecipeIngredient"]
     assert "optional" in ingredient_schema["required"]
     assert client.responses.calls[0]["max_output_tokens"] == 1200
