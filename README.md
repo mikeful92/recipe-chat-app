@@ -66,8 +66,10 @@ This step is required before running `make ci` or `make dev`.
   - Optional model name for OpenAI generation
   - Default: `gpt-4.1-mini`
 - `OPENAI_API_KEY`:
-  - Required when `RECIPE_GENERATOR=openai`
-  - App startup fails if missing in OpenAI mode
+  - Required when `RECIPE_GENERATOR=openai` and fallback is disabled
+- `OPENAI_FALLBACK_TO_STUB`:
+  - `1` (default): if OpenAI is unavailable (including missing API key), fallback to stub generator
+  - `0`: disable fallback and return a stable generation-unavailable error contract
 - `RECIPE_DB_PATH`:
   - Optional SQLite DB path
   - Default: `data/recipes.db`
@@ -121,7 +123,9 @@ Runtime behavior:
 - OpenAI mode applies request timeout + retry/backoff for transient API failures.
 - OpenAI responses are validated against `Recipe` and retried once if schema validation fails.
 - `id` is generated server-side.
-- Non-retryable generator failures currently return HTTP `500`.
+- If OpenAI mode fails and `OPENAI_FALLBACK_TO_STUB=1`, API/UI generation falls back to deterministic stub output.
+- If fallback is disabled, `/generate` returns HTTP `503` with a stable error payload:
+  - `{"detail":{"code":"generation_unavailable","message":"Recipe generation is temporarily unavailable. Please try again."}}`
 
 Example:
 
@@ -228,15 +232,14 @@ Codex instructions live in `.codex/` and/or `INSTRUCTIONS.md`.
 Test note:
 
 - Test suite forces `RECIPE_GENERATOR=stub` for determinism, so CI does not depend on external APIs.
+- Manual OpenAI smoke test steps (outside CI): `docs/smoke_openai.md`
 
 ---
 
 ## Future Improvements
 
-- Add explicit API error contract for generation failures (e.g., typed `502/503` responses instead of generic `500`).
 - Add request tracing IDs and structured logging fields for easier production debugging.
 - Support `.env` loading via app config to reduce shell setup friction in local dev.
-- Add optional fallback mode: if OpenAI fails, return stub output with a warning banner.
 - Add model guardrails for cost controls (request budgets, per-day caps, and model allowlist).
 - Add end-to-end integration test (mock server) for OpenAI path with realistic Responses API payloads.
 
