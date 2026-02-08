@@ -11,10 +11,15 @@ class Settings(BaseModel):
     recipe_generator: Literal["stub", "openai"] = "stub"
     openai_api_key: str | None = None
     openai_model: str = "gpt-4.1-mini"
+    openai_fallback_to_stub: bool = True
 
     @model_validator(mode="after")
     def _validate_openai(self) -> "Settings":
-        if self.recipe_generator == "openai" and not self.openai_api_key:
+        if (
+            self.recipe_generator == "openai"
+            and not self.openai_api_key
+            and not self.openai_fallback_to_stub
+        ):
             raise ValueError("OPENAI_API_KEY is required when RECIPE_GENERATOR=openai")
         return self
 
@@ -25,6 +30,7 @@ def get_settings() -> Settings:
         "recipe_generator": os.getenv("RECIPE_GENERATOR", "stub").strip().lower(),
         "openai_api_key": os.getenv("OPENAI_API_KEY"),
         "openai_model": os.getenv("OPENAI_MODEL", "gpt-4.1-mini"),
+        "openai_fallback_to_stub": os.getenv("OPENAI_FALLBACK_TO_STUB", "1"),
     }
     try:
         return Settings.model_validate(raw)

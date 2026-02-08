@@ -3,15 +3,23 @@ import json
 import pytest
 
 from app.schemas.recipe import RecipeRequest
-from app.services.generator_openai import OpenAIRecipeGenerator
+from app.services.generator_openai import (
+    OpenAIRecipeGenerationError,
+    OpenAIRecipeGenerator,
+    openai_generation_counters,
+)
 
 
 class APIConnectionError(Exception):
     pass
 
 
+class APITimeoutError(Exception):
+    pass
+
+
 class FakeResponses:
-    def __init__(self, sequence: list[dict | Exception]) -> None:
+    def __init__(self, sequence: list[dict | str | Exception | object]) -> None:
         self._sequence = sequence
         self.calls: list[dict] = []
 
@@ -20,16 +28,22 @@ class FakeResponses:
         item = self._sequence.pop(0)
         if isinstance(item, Exception):
             raise item
+        if not isinstance(item, (dict, str)):
+            return item
 
         class Response:
-            output_text = json.dumps(item)
+            output_text = item if isinstance(item, str) else json.dumps(item)
 
         return Response()
 
 
 class FakeOpenAIClient:
-    def __init__(self, sequence: list[dict | Exception]) -> None:
+    def __init__(self, sequence: list[dict | str | Exception | object]) -> None:
         self.responses = FakeResponses(sequence)
+
+
+class ResponseWithoutOutputText:
+    pass
 
 
 def _valid_recipe_payload() -> dict:
@@ -95,6 +109,17 @@ def test_openai_generator_retries_on_transport_error_then_succeeds(monkeypatch) 
     assert len(client.responses.calls) == 2
 
 
+def test_openai_generator_retries_on_timeout_error_then_succeeds(monkeypatch) -> None:
+    monkeypatch.setattr("app.services.generator_openai.time.sleep", lambda _: None)
+    client = FakeOpenAIClient([APITimeoutError("timeout"), _valid_recipe_payload()])
+    generator = OpenAIRecipeGenerator(api_key="test-key", model="gpt-4.1-mini", client=client)
+
+    recipe = generator.generate(RecipeRequest(theme="Italian"))
+
+    assert recipe.title == "Tomato Basil Pasta"
+    assert len(client.responses.calls) == 2
+
+
 def test_openai_generator_raises_when_transport_retries_exhausted(monkeypatch) -> None:
     monkeypatch.setattr("app.services.generator_openai.time.sleep", lambda _: None)
     client = FakeOpenAIClient(
@@ -102,7 +127,50 @@ def test_openai_generator_raises_when_transport_retries_exhausted(monkeypatch) -
     )
     generator = OpenAIRecipeGenerator(api_key="test-key", model="gpt-4.1-mini", client=client)
 
-    with pytest.raises(RuntimeError, match="OpenAI API request failed"):
+    with pytest.raises(OpenAIRecipeGenerationError, match="OpenAI API request failed"):
         generator.generate(RecipeRequest(theme="Italian"))
 
     assert len(client.responses.calls) == 3
+
+
+def test_openai_generator_raises_when_output_text_missing() -> None:
+    client = FakeOpenAIClient([ResponseWithoutOutputText()])
+    generator = OpenAIRecipeGenerator(api_key="test-key", model="gpt-4.1-mini", client=client)
+
+    with pytest.raises(OpenAIRecipeGenerationError, match="did not include output_text"):
+        generator.generate(RecipeRequest(theme="Italian"))
+
+
+def test_openai_generator_raises_when_output_is_non_json() -> None:
+    client = FakeOpenAIClient(["not-json"])
+    generator = OpenAIRecipeGenerator(api_key="test-key", model="gpt-4.1-mini", client=client)
+
+    with pytest.raises(OpenAIRecipeGenerationError, match="not valid JSON"):
+        generator.generate(RecipeRequest(theme="Italian"))
+
+
+def test_openai_generator_safe_structured_logs_and_no_secrets(monkeypatch, caplog) -> None:
+    monkeypatch.setattr("app.services.generator_openai.time.sleep", lambda _: None)
+    openai_generation_counters["success"] = 0
+    openai_generation_counters["failure"] = 0
+    client = FakeOpenAIClient([APIConnectionError("timeout"), _valid_recipe_payload()])
+    generator = OpenAIRecipeGenerator(api_key="super-secret-key", model="gpt-4.1-mini", client=client)
+
+    with caplog.at_level("INFO", logger="app.services.generator_openai"):
+        generator.generate(RecipeRequest(theme="Italian", ingredients=["tomato"]))
+
+    records = [r for r in caplog.records if r.msg == "openai_recipe_generation"]
+    assert records
+    success = records[-1]
+    assert success.outcome == "success"
+    assert success.generator_mode == "openai"
+    assert success.retry_count == 1
+    assert hasattr(success, "has_theme")
+    assert hasattr(success, "ingredients_count")
+    assert hasattr(success, "healthy")
+    assert hasattr(success, "quick_easy")
+    assert openai_generation_counters["success"] == 1
+    assert openai_generation_counters["failure"] == 0
+    assert "super-secret-key" not in caplog.text
+    assert "Input request:" not in caplog.text
+    assert "Tomato Basil Pasta" not in caplog.text

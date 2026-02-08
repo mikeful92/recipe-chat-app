@@ -14,8 +14,10 @@ from app.api.recipes import (
     list_recipes,
     save_recipe,
 )
+from app.core.config import get_settings
 from app.schemas.recipe import Recipe, RecipeRequest
 from app.services.generator_factory import get_generator
+from app.services.generator_stub import StubRecipeGenerator
 
 router = APIRouter()
 templates = Jinja2Templates(directory="app/templates")
@@ -47,19 +49,51 @@ async def generate_from_form(
         healthy=healthy is not None,
         quick_easy=quick_easy is not None,
     )
+    settings = get_settings()
     try:
-        recipe = get_generator().generate(recipe_request)
-    except Exception:
-        logger.exception(
-            "Recipe generation failed from UI form",
+        recipe = get_generator(settings).generate(recipe_request)
+    except Exception as exc:
+        if settings.recipe_generator == "openai" and settings.openai_fallback_to_stub:
+            logger.warning(
+                "ui_recipe_generation",
+                extra={
+                    "outcome": "fallback",
+                    "generator_mode": "openai",
+                    "error_class": exc.__class__.__name__,
+                    "has_theme": recipe_request.theme is not None,
+                    "ingredients_count": len(recipe_request.ingredients),
+                    "healthy": recipe_request.healthy,
+                    "quick_easy": recipe_request.quick_easy,
+                },
+            )
+            recipe = StubRecipeGenerator().generate(recipe_request)
+        else:
+            logger.warning(
+                "ui_recipe_generation",
+                extra={
+                    "outcome": "failure",
+                    "generator_mode": settings.recipe_generator,
+                    "error_class": exc.__class__.__name__,
+                    "has_theme": recipe_request.theme is not None,
+                    "ingredients_count": len(recipe_request.ingredients),
+                    "healthy": recipe_request.healthy,
+                    "quick_easy": recipe_request.quick_easy,
+                },
+            )
+            return RedirectResponse(url="/?error=1", status_code=303)
+
+    if settings.recipe_generator == "openai":
+        logger.info(
+            "ui_recipe_generation",
             extra={
+                "outcome": "success",
+                "generator_mode": "openai",
                 "has_theme": recipe_request.theme is not None,
                 "ingredients_count": len(recipe_request.ingredients),
                 "healthy": recipe_request.healthy,
                 "quick_easy": recipe_request.quick_easy,
             },
         )
-        return RedirectResponse(url="/?error=1", status_code=303)
 
     return templates.TemplateResponse(
         request,
