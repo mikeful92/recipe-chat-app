@@ -81,3 +81,12 @@ If this does not include `.venv`, stop and activate the venv.
   - `tests/test_ui_pages.py`
   - `tests/test_ui.py`
 - If UI structure/state behavior changes, update those tests first, then implement.
+
+## 5) Multi-agent workflow (planner -> developer -> reviewer)
+
+- Agent orchestration source of truth is `AGENTS.md` at repo root.
+- Feature flow:
+  - Planner writes `docs/plan-<feature-slug>.md`.
+  - Developer implements against that plan and updates it if deviations are needed.
+  - Reviewer writes `docs/review-<feature-slug>.md` and validates implementation vs plan.
+- Each role must still comply with all rules in this file (venv, TDD, `make ci`, security).
