@@ -25,7 +25,10 @@ def _recipe_payload(recipe_id: str = "recipe-1") -> dict:
         ],
         "substitutions": ["Use white beans instead of chickpeas."],
         "cook_mode": {
-            "ingredients_checklist": ["chickpeas", "lemon"],
+            "ingredients_checklist": [
+                {"name": "chickpeas", "amount": "1", "unit": "can", "optional": False},
+                {"name": "lemon", "amount": "1", "unit": "item", "optional": False},
+            ],
             "step_cards": ["Warm chickpeas.", "Add lemon zest and serve."],
         },
     }

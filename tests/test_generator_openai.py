@@ -1,8 +1,9 @@
 import json
 
 import pytest
+from pydantic import ValidationError
 
-from app.schemas.recipe import RecipeRequest
+from app.schemas.recipe import Recipe, RecipeRequest
 from app.services.generator_openai import (
     OpenAIRecipeGenerationError,
     OpenAIRecipeGenerator,
@@ -64,7 +65,10 @@ def _valid_recipe_payload() -> dict:
         ],
         "substitutions": ["Use parsley instead of basil."],
         "cook_mode": {
-            "ingredients_checklist": ["Gather tomatoes", "Gather basil"],
+            "ingredients_checklist": [
+                {"name": "tomato", "amount": "2", "unit": "item", "optional": False},
+                {"name": "basil", "amount": "5", "unit": "leaf", "optional": False},
+            ],
             "step_cards": ["Chop tomatoes.", "Mix with basil."],
         },
     }
@@ -178,3 +182,37 @@ def test_openai_generator_safe_structured_logs_and_no_secrets(monkeypatch, caplo
     assert "super-secret-key" not in caplog.text
     assert "Input request:" not in caplog.text
     assert "Tomato Basil Pasta" not in caplog.text
+
+
+def test_cook_mode_ingredients_checklist_has_required_fields() -> None:
+    """Verify cook_mode.ingredients_checklist entries have name, amount, unit, optional fields."""
+    payload = _valid_recipe_payload()
+    client = FakeOpenAIClient([payload])
+    generator = OpenAIRecipeGenerator(api_key="test-key", model="gpt-4.1-mini", client=client)
+
+    recipe = generator.generate(RecipeRequest(ingredients=["tomato", "basil"]))
+
+    for item in recipe.cook_mode.ingredients_checklist:
+        assert hasattr(item, "name")
+        assert hasattr(item, "amount")
+        assert hasattr(item, "unit")
+        assert hasattr(item, "optional")
+        assert isinstance(item.name, str)
+        assert isinstance(item.amount, str)
+        assert isinstance(item.unit, str)
+        assert isinstance(item.optional, bool)
+
+
+def test_recipe_schema_rejects_legacy_string_checklist() -> None:
+    """Verify Recipe schema rejects cook_mode.ingredients_checklist as list[str]."""
+    legacy_payload = _valid_recipe_payload()
+    # Replace ingredient objects with strings (old format)
+    legacy_payload["cook_mode"]["ingredients_checklist"] = ["Gather tomatoes", "Gather basil"]
+
+    with pytest.raises(ValidationError) as exc_info:
+        Recipe.model_validate(legacy_payload)
+
+    errors = exc_info.value.errors()
+    assert len(errors) > 0
+    # Verify the error is about the ingredients_checklist field
+    assert any("ingredients_checklist" in str(e) for e in errors)

@@ -26,7 +26,7 @@ class StubRecipeGenerator:
         ]
 
         cook_mode = CookMode(
-            ingredients_checklist=[f"Gather {name}" for name in ingredient_names],
+            ingredients_checklist=ingredients,
             step_cards=[step.text for step in steps],
         )
         summary_ingredients = ", ".join(ingredient_names[:2])

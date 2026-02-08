@@ -33,7 +33,7 @@ class RecipeStep(BaseModel):
 class CookMode(BaseModel):
     model_config = ConfigDict(extra="forbid")
 
-    ingredients_checklist: list[str]
+    ingredients_checklist: list[RecipeIngredient]
     step_cards: list[str]
 
 

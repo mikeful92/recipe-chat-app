@@ -18,7 +18,7 @@
         <li>
           <label class="checkbox-row">
             <input type="checkbox" data-ingredient-index="{{ loop.index0 }}" />
-            {{ item }}
+            {{ item.amount }} {{ item.unit }} {{ item.name }}
           </label>
         </li>
       {% endfor %}

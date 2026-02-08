@@ -143,7 +143,9 @@ The API returns a `Recipe` JSON object containing:
 - `ingredients[]` (`name`, `amount`, `unit`, optional)
 - `steps[]` (`step`, `text`, `timer_minutes?`)
 - `substitutions[]`
-- `cook_mode` (`ingredients_checklist[]`, `step_cards[]`)
+- `cook_mode`:
+  - `ingredients_checklist[]` (`name`, `amount`, `unit`, `optional`)
+  - `step_cards[]`
 
 Full schema lives in: `app/schemas/recipe.py`
 
@@ -214,6 +216,7 @@ The UI is server-rendered (Jinja templates) with a small tokenized CSS system.
 - Shared template macro(s): `app/templates/components.html`
 - Form submit loading affordance: `app/static/ui.js`
 - Cook mode interactions (step nav + checklist persistence): `app/static/cook.js`
+- Cook mode checklist labels render `amount + unit + name` (example: `1 can chickpeas`)
 
 When updating UI, keep class usage aligned with the shared primitives (`btn`, `input`, `textarea`, `card`, `panel`, `page-header`) instead of creating one-off styles.
 

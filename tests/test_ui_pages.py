@@ -29,7 +29,9 @@ def _recipe_payload(recipe_id: str, title: str, dish_summary: str = "A cozy, fas
         ],
         "substitutions": ["Use white beans."],
         "cook_mode": {
-            "ingredients_checklist": ["chickpeas"],
+            "ingredients_checklist": [
+                {"name": "chickpeas", "amount": "1", "unit": "can", "optional": False}
+            ],
             "step_cards": ["Warm chickpeas."],
         },
     }
@@ -200,6 +202,35 @@ def test_saved_recipe_cook_mode_page_includes_title_and_first_step(
             )
             assert "Warm chickpeas." in cook_resp.text
             assert 'href="/recipes/ui/cook-page-ui"' in cook_resp.text
+
+    asyncio.run(run())
+
+
+def test_cook_mode_page_renders_ingredients_with_amounts_and_units(
+    monkeypatch, tmp_path: Path
+) -> None:
+    """Verify cook mode renders ingredient checklist with amounts and units."""
+    _set_db(monkeypatch, tmp_path)
+    payload = _recipe_payload("cook-amounts-ui", "Cook Amounts UI Recipe")
+
+    async def run() -> None:
+        transport = httpx.ASGITransport(app=app)
+        async with httpx.AsyncClient(transport=transport, base_url="http://test") as client:
+            save_resp = await client.post("/recipes", json=payload)
+            assert save_resp.status_code == 200
+
+            cook_resp = await client.get("/cook/cook-amounts-ui")
+            assert cook_resp.status_code == 200
+
+            # Verify ingredients checklist renders with amount + unit + name
+            # Looking for pattern like "1 can chickpeas"
+            assert "1 can chickpeas" in cook_resp.text
+
+            # Verify checklist is in the page
+            assert "Ingredients Checklist" in cook_resp.text
+
+            # Verify checkbox labels include full ingredient description
+            assert 'data-ingredient-index="0"' in cook_resp.text
 
     asyncio.run(run())
 
