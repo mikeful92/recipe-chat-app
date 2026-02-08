@@ -71,3 +71,13 @@ If this does not include `.venv`, stop and activate the venv.
   - `tests/test_recipes.py`
 - If persistence behavior changes, update README API docs and persistence tests.
 - Keep test runs deterministic: tests force stub generator mode via `tests/conftest.py`.
+
+## 4) UI change guardrails
+
+- Reuse existing UI primitives and tokens:
+  - `app/static/styles.css`
+  - `app/templates/components.html`
+- Major UI pages and flows are covered by:
+  - `tests/test_ui_pages.py`
+  - `tests/test_ui.py`
+- If UI structure/state behavior changes, update those tests first, then implement.
